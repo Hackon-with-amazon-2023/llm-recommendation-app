@@ -3,16 +3,17 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from telegram.ext import filters , MessageHandler
+
 # from langchain.llms import OpenAI
 from .llm_prompts import LLM
+from .scrape_products import ChromeDriver
 
 
 
 class TelegramBot:
     queries = {}
-    app = None
 
-    def __init__(self, token: str, llm: LLM) -> None:
+    def __init__(self, token: str, llm: LLM, driver: ChromeDriver) -> None:
         self.app = ApplicationBuilder().token(token).build()
         self.app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), self.message_handler))
         self.app.add_handler(CommandHandler("hello", self.start))
@@ -21,6 +22,7 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("reset_search_query", self.reset_search_query))
 
         self.llm = llm
+        self.driver = driver
 
 
 
@@ -41,6 +43,7 @@ class TelegramBot:
                                             'For example: Show me some laptops in range Rs. 30000 to 40000')
         else:
             await update.message.reply_text(f'Getting Products for query:\n{self.queries[update.effective_user.id]}')
+            await update.message.reply_text('Scraped products:\n' + str(self.driver.scrape_products(self.queries[update.effective_user.id])))
 
 
 
@@ -74,5 +77,6 @@ if __name__ == "__main__":
     import os
 
     load_dotenv()
-    telegramBot = TelegramBot(token=os.getenv("telegram_token"))
+    llm = LLM(OPENAI_API_KEY=os.getenv("OPENAI_API_KEY"))
+    telegramBot = TelegramBot(token=os.getenv("telegram_token"), llm=llm)
     telegramBot.app.run_polling()
