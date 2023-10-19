@@ -43,7 +43,8 @@ class TelegramBot:
                                             'For example: Show me some laptops in range Rs. 30000 to 40000')
         else:
             await update.message.reply_text(f'Getting Products for query:\n{self.queries[update.effective_user.id]}')
-            await update.message.reply_text('Scraped products:\n' + str(self.driver.scrape_products(self.queries[update.effective_user.id])))
+            data = self.driver.scrape_products(self.queries[update.effective_user.id])
+            await update.message.reply_text('Scraped products:\n' + "\n".join([str(i) for i in data['product_names']]))
 
 
 
@@ -63,11 +64,14 @@ class TelegramBot:
 
         print("Text from:", update.effective_user.id, "\nText:", new_text)
         self.queries[update.effective_user.id] = self.llm.get_user_query(old_query=old_text, new_message=new_text)
-        await update.message.reply_text(f'{self.queries[update.effective_user.id]}' + 
-                                        f'\n\nIs this what you are looking for {update.effective_user.first_name}?\n'
-                                        'If the following query is correct then please click /get_products\n'
-                                        'if you want to update the query then please send the follow up message\n'
-                                        'and if your query is entirely wrong then please click /reset_search_query')
+        if self.queries[update.effective_user.id] != "":
+            await update.message.reply_text(f'{self.queries[update.effective_user.id]}' + 
+                                            f'\n\nIs this what you are looking for {update.effective_user.first_name}?\n'
+                                            'If the following query is correct then please click /get_products\n'
+                                            'if you want to update the query then please send the follow up message\n'
+                                            'and if your query is entirely wrong then please click /reset_search_query')
+        else:
+            await update.message.reply_text("Sorry, I am not able to understand what you are looking for. Please try again")
  
 
 

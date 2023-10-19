@@ -13,7 +13,7 @@ class LLM:
         self.user_query_prompt_template = PromptTemplate.from_template(
             "You are a seller of ecommerce store, you want to help a customer who wants to buy some products from an your store online but don't know how to write query to search products according to his requirements.\n"
             "So he ask you to help him in writing the query to search bar of website.\n"
-            "Give more importance to the last sentence in the User Query\n"
+            "Give more importance to the last sentence in the User Query and do not keep any special character in the reply\n"
             "You have to reply in the following format:\n"
             "{{\"query\": \"Your Query\"}}\n"
             "Example1:\n"
@@ -22,6 +22,9 @@ class LLM:
             "Example2:\n"
             "User Query: 'Red or Blue Shirt, Show me shoes'\n"
             "You: {{\"query\": \"Shoes\"}}\n"
+            "Example3:\n"
+            "User Query: 'shoes, show me in max price of Rs2000'\n"
+            "You: {{\"query\": \"Shoes under Rs 2000\"}}\n"
             ""
             ""
             "Give reply for the following query.\n"
