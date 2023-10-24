@@ -68,19 +68,25 @@ class TelegramBot:
             data = self.driver.scrape_products(query)
 
             print(data)
-
-            scraped_data_message = "\n\n".join([str((i+1)) + ". " + str(data['product_names'][i]) for i in range(len(data['product_names'][:10]))])
-
-            # keyboardButtons = [InlineKeyboardButton("Reset Search Query", callback_data="reset_search_query")]
-            keyboardButtonsRow1, keyboardButtonsRow2 = [], []
-            for i in range(len(data['product_names'][:5])):
-                keyboardButtonsRow1.append(InlineKeyboardButton(f"{i+1}", callback_data=f"{data['product_asin'][i]}"))
-            for i in range(5, len(data['product_names'][:10])):
-                keyboardButtonsRow2.append(InlineKeyboardButton(f"{i+1}", callback_data=f"{data['product_asin'][i]}"))
-            keyBoardMarkup = InlineKeyboardMarkup(inline_keyboard=[keyboardButtonsRow1, keyboardButtonsRow2])
+            data = {
+                "product_names": data['product_names'][:10],
+                "link": data['product_asin'][:10],
+            }
             
-            await update.message.reply_text('These are the products related to your query, click on the buttons to know more about product.\n' + \
-                                                scraped_data_message, reply_markup=keyBoardMarkup)
+            await update.message.reply_text(self.llm.get_recommendation(data, self.queries[update.effective_user.id]))
+
+            # scraped_data_message = "\n\n".join([str((i+1)) + ". " + str(data['product_names'][i]) for i in range(len(data['product_names'][:10]))])
+
+            # # keyboardButtons = [InlineKeyboardButton("Reset Search Query", callback_data="reset_search_query")]
+            # keyboardButtonsRow1, keyboardButtonsRow2 = [], []
+            # for i in range(len(data['product_names'][:5])):
+            #     keyboardButtonsRow1.append(InlineKeyboardButton(f"{i+1}", callback_data=f"{data['product_asin'][i]}"))
+            # for i in range(5, len(data['product_names'][:10])):
+            #     keyboardButtonsRow2.append(InlineKeyboardButton(f"{i+1}", callback_data=f"{data['product_asin'][i]}"))
+            # keyBoardMarkup = InlineKeyboardMarkup(inline_keyboard=[keyboardButtonsRow1, keyboardButtonsRow2])
+            
+            # await update.message.reply_text('These are the products related to your query, click on the buttons to know more about product.\n' + \
+            #                                     scraped_data_message, reply_markup=keyBoardMarkup)
 
 
 

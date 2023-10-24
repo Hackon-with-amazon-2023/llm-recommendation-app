@@ -63,27 +63,18 @@ Output:
 """
 
 
-recommandation_prompt = """
-Your are good in recommending items to user. 
-You will be given an input list of items, and item requirements. Your task is to recommend items to the user using the previous chat context and user preferences, also provide an explanation for the recommendation.
-
-Contexts:
-```
-{context_str}
-```
-
-User Requirements:
-```
-{user_requirements}
-```
+recommendation_prompt = """
+You are a e-commerce recommendation assistant
+You are given a product list in JSON format, based on your understanding reply to the user query
+Try to give detailed answers, use the product details and mention all it's qualities.
+Mention the link for the described product as well, link is amazon.com/dp/product_asin
 
 Product List:
 ```
 {product_list}
 ```
-
-Answer:
 """
+
 
 
 
@@ -102,7 +93,8 @@ extraction_prompt_template = PromptTemplate(
 )
 
 
-recommandation_prompt_template = PromptTemplate(
-    input_variables=["user_requirements", "product_list", "context_str"],
-    template=recommandation_prompt
+recommendation_prompt_template = PromptTemplate(
+    template=recommendation_prompt,
+    input_variables=["product_list"]
 )
+
