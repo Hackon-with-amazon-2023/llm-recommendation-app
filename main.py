@@ -1,20 +1,24 @@
-from python_modules.scrape_products import get_driver, driver_alive, scrape_products, quit_driver
-from python_modules.telegram_bot import start_telegram_bot
+from python_modules.scrape_products import ChromeDriver
+from python_modules.telegram_bot import TelegramBot
+from python_modules.llm_prompts import LLM
+from keep_bot_alive import keep_alive
 
 from dotenv import load_dotenv
 import os
 
 
 load_dotenv()
+keep_alive()
 
-driver = get_driver()
-app = start_telegram_bot(token=os.getenv("telegram_token"))
+driver = ChromeDriver()
+llm = LLM(OPENAI_API_KEY=os.getenv("OPENAI_API_KEY"))
+telegramBot = TelegramBot(token=os.getenv("TELEGRAM_TOKEN"), llm=llm, driver=driver)
 
 
-data = scrape_products(driver, "Air Conditionor")
+data = driver.scrape_products("Air Conditionor")
 print(data)
 
 
 
-app.run_polling()
-quit_driver(driver)
+telegramBot.app.run_polling()
+driver.quit_driver(driver)
