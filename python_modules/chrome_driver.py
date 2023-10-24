@@ -19,8 +19,8 @@ class ChromeDriver:
         self.options = Options()
         self.options.add_argument('--no-sandbox')
         self.options.add_argument('--disable-dev-shm-usage')
-        self.options.add_argument('--headless')
-        self.options.add_argument("user-data-dir=selenium_user_data")
+        # self.options.add_argument('--headless')
+        # self.options.add_argument("user-data-dir=selenium_user_data")
 
 
         self.driver = None

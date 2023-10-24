@@ -1,7 +1,7 @@
 import json
 from langchain.llms import OpenAI
-from utils.prompt_templates import standalone_prompt_template, extraction_prompt_template
-from utils.constants import MODEL_NAME, MAX_TOKENS, TEMPERATURE
+from .utils.prompt_templates import standalone_prompt_template, extraction_prompt_template
+from .utils.constants import MODEL_NAME, MAX_TOKENS, TEMPERATURE
 
 
 

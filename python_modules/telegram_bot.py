@@ -67,6 +67,8 @@ class TelegramBot:
                                             reply_markup=self.reply_markup_remove)
             data = self.driver.scrape_products(query)
 
+            print(data)
+
             scraped_data_message = "\n\n".join([str((i+1)) + ". " + str(data['product_names'][i]) for i in range(len(data['product_names'][:10]))])
 
             # keyboardButtons = [InlineKeyboardButton("Reset Search Query", callback_data="reset_search_query")]
