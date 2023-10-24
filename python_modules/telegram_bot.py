@@ -11,7 +11,7 @@ from .chrome_driver import ChromeDriver
 
 
 class TelegramBot:
-    queries = {}
+    queries = {}                    # previous queries of users
 
     def __init__(self, token: str, llm: LLM, driver: ChromeDriver) -> None:
         self.app = ApplicationBuilder().token(token).build()
@@ -57,13 +57,15 @@ class TelegramBot:
 
 
     async def get_products(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        if update.effective_user.id not in self.queries or self.queries[update.effective_user.id] == "":    
-            await update.message.reply_text(self.get_products_empty_query_message, 
+        if update.effective_user.id not in self.queries: self.queries[update.effective_user.id] = ""
+        query = self.llm.generate_search_query(self.queries[update.effective_user.id])
+        if query == "":
+            await update.message.reply_text(self.get_products_empty_query_message,
                                             reply_markup=self.reply_markup_remove)
         else:
-            await update.message.reply_text(f'Getting Products for query:\n{self.queries[update.effective_user.id]}', 
+            await update.message.reply_text(f'Getting Products for query:\n{query}', 
                                             reply_markup=self.reply_markup_remove)
-            data = self.driver.scrape_products(self.queries[update.effective_user.id])
+            data = self.driver.scrape_products(query)
 
             scraped_data_message = "\n\n".join([str((i+1)) + ". " + str(data['product_names'][i]) for i in range(len(data['product_names'][:10]))])
 
@@ -114,7 +116,7 @@ class TelegramBot:
             return
 
         print("Text from:", update.effective_user.username, update.effective_user.id, "\nText:", new_text)
-        self.queries[update.effective_user.id] = self.llm.get_user_query(old_query=old_text, new_message=new_text)
+        self.queries[update.effective_user.id] = self.llm.generate_standalone_question(previous_query=old_text, new_query=new_text)
 
         if self.queries[update.effective_user.id] != "":
             reply_markup_keyboard_buttons = [[KeyboardButton(text="Yes, Get Products"), KeyboardButton(text="No, Update Query")], [KeyboardButton(text="Reset Search Query")]]
