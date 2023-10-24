@@ -19,8 +19,8 @@ class ChromeDriver:
         self.options = Options()
         self.options.add_argument('--no-sandbox')
         self.options.add_argument('--disable-dev-shm-usage')
-        self.options.add_argument('--headless')
-        self.options.add_argument("user-data-dir=selenium_user_data")
+        # self.options.add_argument('--headless')
+        # self.options.add_argument("user-data-dir=selenium_user_data")
 
 
         self.driver = None
@@ -101,39 +101,6 @@ class ChromeDriver:
                 "product_names": ["An error occured while scraping products", "Please contact owner or try again later"],
             }
     
-
-    # def fillCaptcha(self, captcha):
-    #     if not self.driver.find_element(By.CSS_SELECTOR, "form[action='/errors/validateCaptcha']"):
-    #         return {
-    #             "type": "nocaptcha"
-    #         }
-
-    #     if len(captcha) != 6:
-    #         return {
-    #             "type": "invalidcaptcha"
-    #         }
-
-    #     captchaChars = self.driver.find_element(By.CSS_SELECTOR, "form[action='/errors/validateCaptcha']>input")
-    #     captchaChars.send_keys(captcha)
-
-    #     submitButton = self.driver.find_element(By.CSS_SELECTOR, "form[action='/errors/validateCaptcha']>input[type='submit']")
-    #     submitButton.click()
-
-    #     # wait for the page to load
-    #     self.driver.implicitly_wait(10)
-    #     if self.driver.find_element(By.CSS_SELECTOR, "form[action='/errors/validateCaptcha']"):
-    #         print("Captcha found")
-    #         return {
-    #             "type": "Captcha",
-    #             "product_names": ["Captcha found", "Please contact owner or try again later"],
-    #             "image": self.driver.find_element(By.CSS_SELECTOR, "form[action='/errors/validateCaptcha']>img").get_attribute("src")
-    #         }
-        
-    #     return {
-    #         "type": "success"
-    #     }
-
-
     def quit_driver(self, driver):
         try:
             self.driver.quit()

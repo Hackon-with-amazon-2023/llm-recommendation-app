@@ -1,49 +1,48 @@
 import json
 from langchain.llms import OpenAI
-from langchain.prompts import PromptTemplate
+from .utils.prompt_templates import standalone_prompt_template, extraction_prompt_template
+from .utils.constants import MODEL_NAME, MAX_TOKENS, TEMPERATURE
 
 
 
 
 class LLM:
     def __init__(self, OPENAI_API_KEY) -> None:
-        self.llm = OpenAI(openai_api_key=OPENAI_API_KEY)
+        self.llm = OpenAI(openai_api_key=OPENAI_API_KEY, model=MODEL_NAME)
 
 
-        self.user_query_prompt_template = PromptTemplate.from_template(
-            "You are a seller of ecommerce store, you want to help a customer who wants to buy some products from an your store online but don't know how to write query to search products according to his requirements.\n"
-            "So he ask you to help him in writing the query to search bar of website.\n"
-            "Give more importance to the last sentence in the User Query and do not keep any special character in the reply\n"
-            "You have to reply in the following format:\n"
-            "{{\"query\": \"Your Query\"}}\n"
-            "Example1:\n"
-            "User Query: 'I want to buy a shirt which is blue in color or may be red'\n"
-            "You: {{\"query\": \"Red or Blue Shirt\"}}\n"
-            "Example2:\n"
-            "User Query: 'Red or Blue Shirt, Show me shoes'\n"
-            "You: {{\"query\": \"Shoes\"}}\n"
-            "Example3:\n"
-            "User Query: 'shoes, show me in max price of Rs2000'\n"
-            "You: {{\"query\": \"Shoes under Rs 2000\"}}\n"
-            ""
-            ""
-            "Give reply for the following query.\n"
-            "User Query: {query}\n"
-            "You: "
-        )
+    def generate_standalone_question(self, previous_query, new_query):
+        # Standalone question
+        standalone_prompt = standalone_prompt_template.format(new_query=new_query, previous_query=previous_query)
+        standalone_question_response = self.llm.predict(standalone_prompt, temperature=TEMPERATURE)
+        standalone_question = json.loads(standalone_question_response)['standalone_question']
+        return standalone_question
+    
+
+    def extract_information(self, standalone_question):
+        # Extract products information from standalone question
+        extraction_prompt = extraction_prompt_template.format(question=standalone_question)
+        response = self.llm.predict(extraction_prompt, temperature=TEMPERATURE)
+        extracted_info = json.loads(response)
+        return extracted_info
 
 
-
-    def predict(self, user_query, temperature=0.5):
-        user_query_prompt = self.user_query_prompt_template.format(query=user_query)
-        return self.llm.predict(user_query_prompt, temperature=temperature)
-
-
-    def get_user_query(self, old_query, new_message):
-        user_query = f"{old_query}, {new_message}"
-        user_query_prompt = self.user_query_prompt_template.format(query=user_query)
-        user_query_response = self.llm.predict(user_query_prompt, temperature=0.5)
-
-        user_query = json.loads(user_query_response)['query']
-        return user_query
+    def generate_search_query(self, standalone_question):
+        extected_info = self.extract_information(standalone_question)
+        query = extected_info['product_category']
+        if extected_info['product_category'] == "":
+            return ""
+        if extected_info['product_names'] != []:
+            query += " " + " ".join(extected_info['product_names'])
+        if extected_info['filters']['budget']['low'] != None and extected_info['filters']['budget']['high'] != None:
+            query += " in range " + str(extected_info['filters']['budget']['low']) + " to " + str(extected_info['filters']['budget']['high'])
+        elif extected_info['filters']['budget']['low'] != None:
+            query += " above " + str(extected_info['filters']['budget']['low'])
+        elif extected_info['filters']['budget']['high'] != None:
+            query += " below " + str(extected_info['filters']['budget']['high'])
+        if extected_info['filters']['brands'] != []:
+            query += " " + " ".join(extected_info['filters']['brands'])
+        if extected_info['filters']['ratings'] != None:
+            query += " with rating " + str(extected_info['filters']['ratings'])
+        return query
 
