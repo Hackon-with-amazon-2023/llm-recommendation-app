@@ -1,6 +1,6 @@
-import json
+import json, openai
 from langchain.llms import OpenAI
-from .utils.prompt_templates import standalone_prompt_template, extraction_prompt_template
+from .utils.prompt_templates import standalone_prompt_template, extraction_prompt_template, recommendation_prompt_template
 from .utils.constants import MODEL_NAME, MAX_TOKENS, TEMPERATURE
 
 
@@ -8,6 +8,7 @@ from .utils.constants import MODEL_NAME, MAX_TOKENS, TEMPERATURE
 
 class LLM:
     def __init__(self, OPENAI_API_KEY) -> None:
+        self.API_KEY = OPENAI_API_KEY
         self.llm = OpenAI(openai_api_key=OPENAI_API_KEY, model=MODEL_NAME)
 
 
@@ -46,3 +47,18 @@ class LLM:
             query += " with rating " + str(extected_info['filters']['ratings'])
         return query
 
+
+    def get_recommendation(self, product_list, question):
+        prompt = recommendation_prompt_template.format(product_list=product_list);
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", 
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": question}
+            ],
+            api_key=self.API_KEY,
+            temperature=1
+        )
+        
+        return response['choices'][0]['message']['content']
