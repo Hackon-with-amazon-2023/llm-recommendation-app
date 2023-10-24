@@ -47,8 +47,17 @@ class ChromeDriver:
         if not self.is_driver_alive():
             self.driver = self.get_driver()
         try:
-            if "amazon.com" not in self.driver.current_url and "amazon.in" not in self.driver.current_url:
+            # if "amazon.com" not in self.driver.current_url and "amazon.in" not in self.driver.current_url:
+            if len(self.driver.find_elements(By.ID, 'twotabsearchtextbox')) == 0:
                 self.driver.get("https://www.amazon.com")
+
+            if len(self.driver.find_elements(By.CSS_SELECTOR, "form[action='/errors/validateCaptcha']")):
+                print("Captcha found")
+                return {
+                    "type": "Captcha",
+                    "product_names": ["Captcha found", "Please contact owner or try again later"],
+                    "image": self.driver.find_element(By.CSS_SELECTOR, "form[action='/errors/validateCaptcha']>img").get_attribute("src")
+                }
 
             # create WebElement for a search box
             search_box = self.driver.find_element(By.ID, 'twotabsearchtextbox')
@@ -71,23 +80,58 @@ class ChromeDriver:
 
             items = WebDriverWait(self.driver,10).until(EC.presence_of_all_elements_located((By.XPATH, '//div[contains(@class, "s-result-item s-asin")]')))
             for item in items:
-                name = item.find_element(By.XPATH, './/span[@class="a-size-medium a-color-base a-text-normal"]')
-                product_name.append(name.text)
-                data_asin = item.get_attribute("data-asin")
-                product_asin.append(data_asin)
+                try:
+                    name = item.find_element(By.CSS_SELECTOR, 'span.a-text-normal.a-color-base')
+                    data_asin = item.get_attribute("data-asin")
+                    product_name.append(name.text)
+                    product_asin.append(data_asin)
+                except Exception as e:
+                    print("Name not found")
 
             # following return statement is for checking that we correctly scrape data we want
             return {
+                "type": "success",
                 "product_names": product_name,
                 "product_asin": product_asin
             }
         except Exception as e:
             print(e)
             return {
+                "type": "error",
                 "product_names": ["An error occured while scraping products", "Please contact owner or try again later"],
             }
+    
 
+    # def fillCaptcha(self, captcha):
+    #     if not self.driver.find_element(By.CSS_SELECTOR, "form[action='/errors/validateCaptcha']"):
+    #         return {
+    #             "type": "nocaptcha"
+    #         }
 
+    #     if len(captcha) != 6:
+    #         return {
+    #             "type": "invalidcaptcha"
+    #         }
+
+    #     captchaChars = self.driver.find_element(By.CSS_SELECTOR, "form[action='/errors/validateCaptcha']>input")
+    #     captchaChars.send_keys(captcha)
+
+    #     submitButton = self.driver.find_element(By.CSS_SELECTOR, "form[action='/errors/validateCaptcha']>input[type='submit']")
+    #     submitButton.click()
+
+    #     # wait for the page to load
+    #     self.driver.implicitly_wait(10)
+    #     if self.driver.find_element(By.CSS_SELECTOR, "form[action='/errors/validateCaptcha']"):
+    #         print("Captcha found")
+    #         return {
+    #             "type": "Captcha",
+    #             "product_names": ["Captcha found", "Please contact owner or try again later"],
+    #             "image": self.driver.find_element(By.CSS_SELECTOR, "form[action='/errors/validateCaptcha']>img").get_attribute("src")
+    #         }
+        
+    #     return {
+    #         "type": "success"
+    #     }
 
 
     def quit_driver(self, driver):
