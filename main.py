@@ -1,4 +1,4 @@
-from python_modules.scrape_products import ChromeDriver
+from python_modules.chrome_driver import ChromeDriver
 from python_modules.telegram_bot import TelegramBot
 from python_modules.llm_prompts import LLM
 from keep_bot_alive import keep_alive
