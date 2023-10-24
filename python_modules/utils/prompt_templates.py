@@ -63,28 +63,6 @@ Output:
 """
 
 
-recommandation_prompt = """
-Your are good in recommending items to user. 
-You will be given an input list of items, and item requirements. Your task is to recommend items to the user using the previous chat context and user preferences, also provide an explanation for the recommendation.
-
-Contexts:
-```
-{context_str}
-```
-
-User Requirements:
-```
-{user_requirements}
-```
-
-Product List:
-```
-{product_list}
-```
-
-Answer:
-"""
-
 
 
 
@@ -99,10 +77,4 @@ standalone_prompt_template = PromptTemplate(
 extraction_prompt_template = PromptTemplate(
     template=extraction_prompt,
     input_variables=["question"]
-)
-
-
-recommandation_prompt_template = PromptTemplate(
-    input_variables=["user_requirements", "product_list", "context_str"],
-    template=recommandation_prompt
 )

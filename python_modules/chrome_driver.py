@@ -19,8 +19,8 @@ class ChromeDriver:
         self.options = Options()
         self.options.add_argument('--no-sandbox')
         self.options.add_argument('--disable-dev-shm-usage')
-        self.options.add_argument('--headless')
-        self.options.add_argument("user-data-dir=selenium_user_data")
+        # self.options.add_argument('--headless')
+        # self.options.add_argument("user-data-dir=selenium_user_data")
 
 
         self.driver = None
@@ -61,6 +61,7 @@ class ChromeDriver:
 
             # create WebElement for a search box
             search_box = self.driver.find_element(By.ID, 'twotabsearchtextbox')
+            search_box.clear()
             search_box.send_keys(keyword)
 
             # create WebElement for a search button

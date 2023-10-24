@@ -1,14 +1,14 @@
 import json
 from langchain.llms import OpenAI
-from utils.prompt_templates import standalone_prompt_template, extraction_prompt_template
-from utils.constants import MODEL_NAME, MAX_TOKENS, TEMPERATURE
-
+from .utils.prompt_templates import standalone_prompt_template, extraction_prompt_template, recommandation_prompt_template
+from .utils.constants import MODEL_NAME, MAX_TOKENS, TEMPERATURE
 
 
 
 class LLM:
     def __init__(self, OPENAI_API_KEY) -> None:
-        self.llm = OpenAI(openai_api_key=OPENAI_API_KEY, model=MODEL_NAME)
+        self.llm = OpenAI(openai_api_key=OPENAI_API_KEY)
+        # self.llm = OpenAI(openai_api_key=OPENAI_API_KEY, model=MODEL_NAME)
 
 
     def generate_standalone_question(self, previous_query, new_query):
@@ -16,6 +16,7 @@ class LLM:
         standalone_prompt = standalone_prompt_template.format(new_query=new_query, previous_query=previous_query)
         standalone_question_response = self.llm.predict(standalone_prompt, temperature=TEMPERATURE)
         standalone_question = json.loads(standalone_question_response)['standalone_question']
+        print(standalone_question)
         return standalone_question
     
 
@@ -24,11 +25,11 @@ class LLM:
         extraction_prompt = extraction_prompt_template.format(question=standalone_question)
         response = self.llm.predict(extraction_prompt, temperature=TEMPERATURE)
         extracted_info = json.loads(response)
+        print(extracted_info)
         return extracted_info
 
 
-    def generate_search_query(self, standalone_question):
-        extected_info = self.extract_information(standalone_question)
+    def generate_search_query(self, extected_info):
         query = extected_info['product_category']
         if extected_info['product_category'] == "":
             return ""

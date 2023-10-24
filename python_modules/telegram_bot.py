@@ -12,6 +12,7 @@ from .chrome_driver import ChromeDriver
 
 class TelegramBot:
     queries = {}                    # previous queries of users
+    user_requirements = {}          # user requirements for recommendation
 
     def __init__(self, token: str, llm: LLM, driver: ChromeDriver) -> None:
         self.app = ApplicationBuilder().token(token).build()
@@ -57,8 +58,13 @@ class TelegramBot:
 
 
     async def get_products(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        if update.effective_user.id not in self.queries: self.queries[update.effective_user.id] = ""
-        query = self.llm.generate_search_query(self.queries[update.effective_user.id])
+        if update.effective_user.id not in self.queries: 
+            self.queries[update.effective_user.id] = ""
+            await update.message.reply_text(self.get_products_empty_query_message,
+                                            reply_markup=self.reply_markup_remove)
+            return
+        
+        query = self.llm.generate_search_query(self.user_requirements[update.effective_user.id])
         if query == "":
             await update.message.reply_text(self.get_products_empty_query_message,
                                             reply_markup=self.reply_markup_remove)
@@ -117,11 +123,13 @@ class TelegramBot:
 
         print("Text from:", update.effective_user.username, update.effective_user.id, "\nText:", new_text)
         self.queries[update.effective_user.id] = self.llm.generate_standalone_question(previous_query=old_text, new_query=new_text)
+        self.user_requirements[update.effective_user.id] = self.llm.extract_information(self.queries[update.effective_user.id])
 
-        if self.queries[update.effective_user.id] != "":
+        search_query = self.llm.generate_search_query(self.user_requirements[update.effective_user.id])
+        if search_query != "":
             reply_markup_keyboard_buttons = [[KeyboardButton(text="Yes, Get Products"), KeyboardButton(text="No, Update Query")], [KeyboardButton(text="Reset Search Query")]]
             reply_markup = ReplyKeyboardMarkup(reply_markup_keyboard_buttons, one_time_keyboard=True, resize_keyboard=True)
-            await update.message.reply_text(self.message_handler_message.format(query=self.queries[update.effective_user.id], name=update.effective_user.first_name), \
+            await update.message.reply_text(self.message_handler_message.format(query=search_query, name=update.effective_user.first_name),
                                             reply_markup=reply_markup)
         else:
             await update.message.reply_text("Sorry, I am not able to understand what you are looking for. Please try again")
