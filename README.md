@@ -29,7 +29,7 @@ You can send your query to the chatbot and it will show you the best products ba
 
 
 ### Flow Chart:
-![architecture (1)](https://github.com/Hackon-with-amazon-2023/llm-recommendation-app/assets/76788689/a4bc2e8c-ed5d-4283-aacf-9b5cc56513f3)
+![Flow Chart](image.png)
 
 
 
