@@ -32,5 +32,19 @@ You can send your query to the chatbot and it will show you the best products ba
 ![Flow Chart](image.png)
 
 
-
 ### You can try out the bot here: [telegram bot](https://t.me/AmazonProductSearchBot)
+
+---
+
+## To run the bot on local:
+1. Clone the repo and install all libraries
+    - ```git clone https://github.com/Hackon-with-amazon-2023/llm-recommendation-app.git```
+    - ```pip install -r requirements.txt```
+
+2. Create a telegram bot using @botfather on telegram and get the token for bot
+
+3. Create a .env file with variables:
+    - TELEGRAM_TOKEN
+    - OPENAI_API_KEY
+
+4. Run `main.py` file
