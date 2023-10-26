@@ -31,7 +31,6 @@ You can send your query to the chatbot and it will show you the best products ba
 ![flow chart](https://github.com/Hackon-with-amazon-2023/llm-recommendation-app/assets/77394228/a2a6b629-56fe-4218-9303-a2ad968a45fb)
 
 
-
 ### You can try out the bot here: [telegram bot](https://t.me/AmazonProductSearchBot)
 
 ---
